@@ -1,0 +1,38 @@
+---
+import { Image } from 'astro:assets'
+
+import SocialIcons from './SocialIcons.astro'
+
+
+const {fullName, title, institute, profilePicture} = Astro.props
+---
+<div class='flex flex-col-reverse lg:flex-row items-center gap-12'>
+  <div class='flex-1'>
+    <h1 class='text-4xl mb-4'>
+      Hi! I'm <span class='font-bold text-primary'>{fullName}</span>
+    </h1>
+    <p class='text-xl text-gray-600 mb-4'>{title}{institute ? ` at ${institute}` : ''}</p>
+    <p class='text-lg mb-6'>
+      Urbanist in San Francisco — 
+      reimagining streets and public spaces to foster connection and community.
+    </p>
+    
+    <p class='text-md mb-2'>I'm currently:</p>
+    <ul class='list-inside text-md space-y-0 mb-6 marker:content-["@_"]'>
+      <li><a href='https://urbanismnow.com'>Urbanism Now</a> sharing the best urbanist ideas and news.</li>
+      <li><a href='https://thelabofthought.co'>The Lab of Thought</a> publishing mobility books and building community.</li>
+      <li><a href='https://archive.org'>Internet Archive</a>'s <a href='https://openlibrary.org'>Open Library</a> as a core contributor.</li>
+    </ul>
+    <div class='flex gap-4'>
+      <SocialIcons />
+    </div>
+  </div>
+  <div class='size-48 lg:size-72'>
+    <!-- Add your profile image -->
+    <Image
+      src={profilePicture}
+      alt={fullName}
+      class='w-full h-full object-cover rounded-full border border-gray'
+    />
+  </div>
+</div>
