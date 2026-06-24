@@ -1,0 +1,109 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import wikipediaArticles from '@/data/wikipedia.json'
+import ArticleLink from '@/components/wikipedia/ArticleLink.astro'
+import TagSection from '@/components/wikipedia/TagSection.astro'
+
+// 'food', 'movies', 'television' removed — now in Culture & Media meta-category
+const sections = [
+    { type: 'tag', tag: 'favorite', heading: '⭐ Favorites' },
+    { type: 'tag', tag: 'urbanism' },
+    { type: 'tag', tag: 'tech' },
+    { type: 'tag', tag: 'people' },
+    { type: 'meta', name: '🌍 Places', tags: ['Florida', 'Hawaii'] },
+    { type: 'meta', name: '🎬 Culture & Media', tags: ['books', 'entertainment', 'food', 'movies', 'television'] },
+    { type: 'tag', tag: 'politics' },
+    { type: 'tag', tag: 'science' },
+    { type: 'tag', tag: 'sea critters' },
+]
+
+function sortArticles(articles, tag) {
+    return [...articles].sort((a, b) => {
+        if (tag === 'favorite') {
+            const aOrder = a.order ?? 999
+            const bOrder = b.order ?? 999
+            if (aOrder !== bOrder) return aOrder - bOrder
+            const aTitle = a.alias || a.title
+            const bTitle = b.alias || b.title
+            return aTitle.localeCompare(bTitle)
+        }
+        if (tag === 'sea critters') {
+            const aOrder = a.order ?? 999
+            const bOrder = b.order ?? 999
+            if (aOrder !== bOrder) return aOrder - bOrder
+            const aTitle = a.alias || a.title
+            const bTitle = b.alias || b.title
+            return aTitle.length - bTitle.length || aTitle.localeCompare(bTitle)
+        }
+        const aDisplay = a.alias || a.title
+        const bDisplay = b.alias || b.title
+        return aDisplay.localeCompare(bDisplay)
+    })
+}
+
+const groupedByTag = {}
+for (const section of sections) {
+    if (section.type === 'tag') {
+        const articles = sortArticles(wikipediaArticles.filter(a => a.tags.includes(section.tag)), section.tag)
+        if (articles.length > 0) {
+            groupedByTag[section.tag] = articles
+        }
+    } else {
+        for (const tag of section.tags) {
+            const articles = sortArticles(wikipediaArticles.filter(a => a.tags.includes(tag)), tag)
+            if (articles.length > 0) {
+                groupedByTag[tag] = articles
+            }
+        }
+    }
+}
+
+const untaggedArticles = wikipediaArticles.filter(a => a.tags.length === 0)
+---
+
+<Layout title='Wikipedia Articles' description='Wikipedia articles created by Raymond Berger' is_prose={true}>
+    <div>
+        <h1>Wikipedia Articles</h1>
+        <p>
+            Writing Wikipedia articles is a great way to give back when you are researching a topic. Here are <strong>{wikipediaArticles.length}</strong> that I have started.
+        </p>
+        <div id='category-view' class='not-prose'>
+            {sections.map((section) => {
+                if (section.type === 'tag') {
+                    const articles = groupedByTag[section.tag]
+                    if (!articles || articles.length === 0) return null
+                    return <TagSection tag={section.tag} articles={articles} heading={section.heading} />
+                }
+                const hasArticles = section.tags.some(t => (groupedByTag[t]?.length ?? 0) > 0)
+                if (!hasArticles) return null
+                return (
+                    <div class='mb-8'>
+                        <h2 class='text-xl font-bold mb-3 text-base-content'>{section.name}</h2>
+                        {section.tags.map((tag) => {
+                            const articles = groupedByTag[tag]
+                            if (!articles || articles.length === 0) return null
+                            return <TagSection tag={tag} articles={articles} />
+                        })}
+                        <hr class='border-base-content/10 mt-2 mb-6' />
+                    </div>
+                )
+            })}
+            {untaggedArticles.length > 0 && (
+                <div class='mb-4 ml-3'>
+                    <h3 class='text-base font-semibold uppercase tracking-wider text-base-content/80 mb-2'>untagged</h3>
+                    <ul class='space-y-1 list-disc ml-5'>
+                        {untaggedArticles.sort((a, b) => {
+                            const aD = a.alias || a.title
+                            const bD = b.alias || b.title
+                            return aD.localeCompare(bD)
+                        }).map((article) => <ArticleLink article={article} />)}
+                    </ul>
+                </div>
+            )}
+            <div id='fn-1' class='not-prose mt-8 pt-4 border-t border-base-content/10 text-sm text-base-content/70 leading-relaxed'>
+                <a href='#fn-ref-1' class='no-underline hover:text-accent font-medium mr-1'>[1]</a>
+                I read <em><a href='https://openlibrary.org/works/OL24347882W/' target='_blank' rel='noopener noreferrer' class='hover:text-accent transition-colors'>A Field Guide to Blackwater Diving in Hawaii</a></em> by Jeff Milisen, and I couldn't stand how many of them were missing entries in Wikipedia.
+            </div>
+        </div>
+    </div>
+</Layout>

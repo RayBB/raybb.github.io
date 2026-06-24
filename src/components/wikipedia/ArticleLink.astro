@@ -1,0 +1,7 @@
+---
+const { article } = Astro.props
+const displayTitle = article.alias || article.title
+---
+<li>
+    <a href={article.url} target='_blank' rel='noopener noreferrer' class='hover:text-accent transition-colors'>{displayTitle}</a>
+</li>

@@ -1,0 +1,15 @@
+---
+import ArticleLink from './ArticleLink.astro'
+
+const { tag, articles, heading } = Astro.props
+const displayHeading = heading || tag
+const isSeaCritters = tag === 'sea critters'
+---
+<div class='mb-4 ml-3'>
+    <h3 class='text-base font-semibold uppercase tracking-wider text-base-content/80 mb-2'>
+        {isSeaCritters ? <>{displayHeading}<sup id='fn-ref-1'><a href='#fn-1' class='no-underline hover:text-accent'>[1]</a></sup></> : displayHeading}
+    </h3>
+    <ul class={`space-y-1 list-disc ml-5 ${isSeaCritters ? 'font-mono' : ''}`}>
+        {articles.map((article) => <ArticleLink article={article} />)}
+    </ul>
+</div>
